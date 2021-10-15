@@ -1,6 +1,6 @@
-# react-native-mnemonic-key
+# react-native-mnemonic
 
-This library provides `RNMnemonicKey`, a native Android and iOS implementation of Terra.js's `MnemonicKey`, made available for React Native. This significantly improves performance and compatibility in mobile apps.
+This library provides `RNMnemonicKey`, a native Android and iOS implementation based on Terra.js's `MnemonicKey`, made available for React Native. This significantly improves performance and compatibility in mobile apps.
 
 ## Installation
 
@@ -34,20 +34,21 @@ android {
 You may need to modify your iOS app's `Podfile` to enable Modular Headers for `TrezorCrypto`.
 
 ```ruby
-# ios/Podfile
 require_relative '../node_modules/react-native/scripts/react_native_pods'
-require_relative '../node_modules/react-native-unimodules/cocoapods.rb'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
-platform :ios, '10.0'
+platform :ios, '11.0'
 
-target 'demo' do
-  use_unimodules!
+target 'Demo' do
   config = use_native_modules!
 
-  use_react_native!(:path => config["reactNativePath"])
   pod 'TrezorCrypto', :modular_headers => true # ADD THIS LINE
-end
+
+  use_react_native!(
+    :path => config[:reactNativePath],
+    # to enable hermes on iOS, change 'false' to 'true' and then install pods
+    :hermes_enabled => true
+  )
 ```
 
 Then run in your React Native iOS app's `ios/` directory:
@@ -57,30 +58,6 @@ $ pod install
 ```
 
 ## Usage
-
-A full example demo app is available inside `/example`.
-
-The usage is nearly identical to Terra.js's `MnemonicKey`, with the exception that `RNMnemonicKey` cannot be instantiated with `new`. You must use the static factory method `RNMnemonicKey.create`, which returns a `Promise<RNMnemonicKey>`.
-
-```ts
-// NOT ALLOWED!
-// new RNMnemonicKey({ ...options })
-
-// RIGHT WAY
-RNMnemonicKey.create({ ...options }).then((rnmk) => terra.wallet(rnmk));
-```
-
-## Demo
-
-For your convenience, a full example demo app is provided as a reference inside `/example`.
-
-```sh
-# Run iOS Demo
-$ yarn example ios
-
-# Run Android Demo
-$ yarn example android
-```
 
 ```tsx
 import * as React from 'react';
@@ -94,20 +71,13 @@ export default function App() {
     RNMnemonicKey.create({
       mnemonic:
         'satisfy adjust timber high purchase tuition stool faith fine install that you unaware feed domain license impose boss human eager hat rent enjoy dawn',
-      coinType: 118,
-      account: 5,
-      index: 32,
-    }).then(setResult);
+      coinType: 0,
+      account: 0,
+      index: 1,
+    }).then((privKey) => {
+      console.log(privKey) // Log the generated privkey to console, usable with bitcoinjs
+    });
   }, []);
-
-  return (
-    <View style={styles.container}>
-      <Text>Address: {result?.accAddress}</Text>
-      <Text>ValAddress: {result?.valAddress}</Text>
-      <Text>Mnemonic: {result?.mnemonic}</Text>
-      <Text>PrivateKey: {result?.privateKey.toString('hex')}</Text>
-    </View>
-  );
 }
 
 const styles = StyleSheet.create({
@@ -124,10 +94,10 @@ const styles = StyleSheet.create({
 });
 ```
 
-![demo](demo.png)
-
 ## License
 
 This software is licensed under the MIT license. See [LICENSE](LICENSE) for full disclosure.
 
 © 2021 Terraform Labs, PTE.
+
+© 2021 Blockworks B.V., The Netherlands.
