@@ -7,7 +7,7 @@ This library provides `RNMnemonicKey`, a native Android and iOS implementation b
 Install to your React Native app's `package.json`:
 
 ```sh
-$ yarn add react-native-mnemonic-key
+$ npm i react-native-mnemonic
 ```
 
 ### Android Setup
@@ -62,7 +62,7 @@ $ pod install
 ```tsx
 import * as React from 'react';
 import { StyleSheet, View, Text } from 'react-native';
-import { RNMnemonicKey } from 'react-native-mnemonic-key';
+import { RNMnemonicKey } from 'react-native-mnemonic';
 
 export default function App() {
   const [result, setResult] = React.useState<RNMnemonicKey | undefined>();
