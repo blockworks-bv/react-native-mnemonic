@@ -77,6 +77,6 @@ export class RNMnemonicKey {
       throw new Error('Failed to derive key pair');
     }
 
-    return privateKey
+    return privateKey;
   }
 }
