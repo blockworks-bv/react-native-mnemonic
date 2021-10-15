@@ -1,5 +1,4 @@
 import { NativeModules } from 'react-native';
-import { Buffer } from 'buffer';
 
 type NativeMKExports = {
   generateMnemonic(): Promise<string>;
@@ -13,9 +12,7 @@ type NativeMKExports = {
 
 export const MK: NativeMKExports = NativeModules.MnemonicKey;
 
-import { RawKey } from '@terra-money/terra.js';
-
-export const LUNA_COIN_TYPE = 330;
+export const BTC_COIN_TYPE = 0;
 
 interface MnemonicKeyOptions {
   /**
@@ -34,7 +31,7 @@ interface MnemonicKeyOptions {
   index?: number;
 
   /**
-   * Coin type. Default is LUNA, 330.
+   * Coin type. Default is BTC, 0.
    */
   coinType?: number;
 }
@@ -42,7 +39,7 @@ interface MnemonicKeyOptions {
 const DEFAULT_OPTIONS = {
   account: 0,
   index: 0,
-  coinType: LUNA_COIN_TYPE,
+  coinType: BTC_COIN_TYPE,
 };
 
 /**
@@ -50,45 +47,29 @@ const DEFAULT_OPTIONS = {
  * that this implementation exposes the private key in memory, so it is not advised to use
  * for applications requiring high security.
  */
-export class RNMnemonicKey extends RawKey {
+export class RNMnemonicKey {
   private constructor(public mnemonic: string, public privateKey: Buffer) {
-    super(privateKey);
     this.mnemonic = mnemonic;
   }
 
-  /**
-   * Creates a new signing key from a mnemonic phrase. If no mnemonic is provided, one
-   * will be automatically generated.
-   *
-   * ### Providing a mnemonic
-   *
-   * ```ts
-   * import { MnemonicKey } from 'terra.js';
-   *
-   * const mk = new MnemonicKey({ mnemonic: '...' });
-   * console.log(mk.accAddress);
-   * ```
-   *
-   * ### Generating a random mnemonic
-   *
-   * ```ts
-   * const mk2 = new MnemonicKey();
-   * console.log(mk2.mnemonic);
-   * ```
-   *
-   * @param options
-   */
-  static async create(
+  static async createMnemonic() {
+    return await MK.generateMnemonic();
+  }
+
+  static async getPrivateKeyForMnemonic(
     options: MnemonicKeyOptions = {}
-  ): Promise<RNMnemonicKey> {
+  ): Promise<Buffer> {
     const { account, index, coinType } = {
       ...DEFAULT_OPTIONS,
       ...options,
     };
+
     let { mnemonic } = options;
+
     if (mnemonic === undefined) {
-      mnemonic = await MK.generateMnemonic();
+      throw new Error('No mnemonic was given');
     }
+
     const pkHex = await MK.derivePrivateKey(mnemonic, coinType, account, index);
     const privateKey = Buffer.from(pkHex, 'hex');
 
@@ -96,6 +77,6 @@ export class RNMnemonicKey extends RawKey {
       throw new Error('Failed to derive key pair');
     }
 
-    return new RNMnemonicKey(mnemonic, privateKey);
+    return privateKey
   }
 }
